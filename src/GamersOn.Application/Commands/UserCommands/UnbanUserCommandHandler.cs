@@ -4,20 +4,20 @@ using GamersOn.Domain.Repositories;
 using MediatR;
 
 namespace GamersOn.Application.Commands.UserCommands;
-public record struct BanUserCommandHandler : IRequestHandler<BanUserCommand, ErrorOr<Task>>
+public record struct UnbanUserCommandHandler : IRequestHandler<UnbanUserCommand, ErrorOr<Task>>
 {
     private readonly IUserRepository _userRepository;
 
-    public BanUserCommandHandler(IUserRepository userRepository)
+    public UnbanUserCommandHandler(IUserRepository userRepository)
     {
         _userRepository = userRepository;
     }
 
-    public async Task<ErrorOr<Task>> Handle(BanUserCommand request, CancellationToken cancellationToken)
+    public async Task<ErrorOr<Task>> Handle(UnbanUserCommand request, CancellationToken cancellationToken)
     {
         if (await _userRepository.GetByIdAsync(request.Id) is User user)
         {
-            user.Ban();
+            user.Unban();
 
             await _userRepository.SaveChangesAsync();
 

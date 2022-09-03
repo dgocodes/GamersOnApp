@@ -21,20 +21,6 @@ public class GameRepository : IGameRepository
         return Task.CompletedTask;
     }
 
-    public Task UpdateAsync(Game game)
-    {
-        _context.Update(game);
-        _context.SaveChanges();
-
-        return Task.CompletedTask;
-    }
-
-    public async Task DeleteAsync(Game game)
-    {
-        game.SetDisable();
-        await _context.SaveChangesAsync();
-    }
-
     public async Task<List<Game>> GetAllAsync()
     {
         return await _context.Games.AsNoTracking()

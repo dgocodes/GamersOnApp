@@ -1,10 +1,12 @@
-﻿using GamersOn.Domain.Entities;
+﻿using ErrorOr;
+using GamersOn.Application.OutputModels;
+using GamersOn.Domain.Entities;
 using GamersOn.Domain.Repositories;
 using GamersOn.Domain.Services;
 using MediatR;
 
 namespace GamersOn.Application.Commands.UserCommands;
-public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Guid>
+public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, ErrorOr<UserResponse>>
 {
     private readonly IUserRepository _userRepository;
     private readonly IPasswordHashService _passwordHashGenerator;
@@ -16,10 +18,12 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Guid>
         _passwordHashGenerator = passwordHashGenerator;
     }
 
-    public async Task<Guid> Handle(CreateUserCommand request, CancellationToken cancellationToken)
+    public async Task<ErrorOr<UserResponse>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
-        if(await _userRepository.GetByEmailAsync(request.Email) is User _)        
-            throw new Exception($"Email {request.Email} ja cadastrado.");        
+        if (await _userRepository.GetByEmailAsync(request.Email) is User _)
+        {
+            return Domain.Common.Errors.User.EmailAlreadyRegistered(request.Email);
+        }   
 
         _passwordHashGenerator.CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
 
@@ -33,6 +37,6 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Guid>
 
         await _userRepository.CreateAsync(newUser);
 
-        return newUser.Id;
+        return UserResponse.FromUser(newUser);
     }
 }

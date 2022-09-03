@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GamersOn.Api.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/auth")]
 public class AuthenticationController : ApiController
 {
     public AuthenticationController(IMediator mediator) : base(mediator)
@@ -16,6 +16,9 @@ public class AuthenticationController : ApiController
     {
         var command = request.ToLoginCommand();
 
-        return Ok(await _mediator.Send(command));
+        var result = await _mediator.Send(command);
+
+        return result.Match(success => Ok(success),
+                            Problem);
     }
 }

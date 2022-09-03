@@ -8,20 +8,15 @@ builder.Services.AddPresentention(builder.Configuration)
                 .AddApplication()
                 .AddInfrastructure(builder.Configuration);
 
-var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+var app = builder.Build();
 {
+    //app.UseMiddleware<ErrorHandlingMiddlware>();
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseHttpsRedirection();
+    app.UseAuthentication();
+    app.UseAuthorization();
+    app.MapControllers();
+    app.Run();
 }
-
-app.UseHttpsRedirection();
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
