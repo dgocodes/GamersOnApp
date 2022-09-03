@@ -36,12 +36,9 @@ public class GamesController : ApiController
     {
         var query = new GetAllGameQuery();
 
-        if (await _mediator.Send(query) is IEnumerable<Game> games)
-        {
-            return Ok(games);
-        }
+        var result = await _mediator.Send(query);
 
-        return NotFound();
+        return result.Match(success => Ok(success), Problem);
     }
 
     // GET api/<GamesController>/5
@@ -50,12 +47,9 @@ public class GamesController : ApiController
     {
         var query = new GetGameByIdQuery(id);
 
-        if (await _mediator.Send(query) is Game game)
-        {
-            return Ok(game);
-        }
+        var result = await _mediator.Send(query);
 
-        return NotFound();
+        return result.Match(success => Ok(success), Problem);
     }
 
     // POST api/<GamesController>
@@ -64,9 +58,9 @@ public class GamesController : ApiController
     {
         var command = request.ToCreateGameCommand();
 
-        var id = await _mediator.Send(command);
+        var result = await _mediator.Send(command);
 
-        return CreatedAtAction(nameof(Get), new { id }, request);
+        return result.Match(success =>  CreatedAtAction(nameof(Get), new { success.Id }, success), Problem);
     }
 
     // PUT api/<GamesController>/5
@@ -75,9 +69,9 @@ public class GamesController : ApiController
     {
         var command = request.ToUpdateGameCommand(id);
 
-        await _mediator.Send(command);
+        var result = await _mediator.Send(command);
 
-        return Ok();
+        return result.Match(success => Ok(success), Problem);
     }
 
     // DELETE api/<GamesController>/5
@@ -86,9 +80,9 @@ public class GamesController : ApiController
     {
         var command = new DeleteGameCommand(id);
 
-        await _mediator.Send(command);
+        var result = await _mediator.Send(command);
 
-        return NoContent();
+        return result.Match(success => NoContent(), Problem);
     }
 
     #endregion

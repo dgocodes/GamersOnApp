@@ -15,16 +15,16 @@ public record struct BanUserCommandHandler : IRequestHandler<BanUserCommand, Err
 
     public async Task<ErrorOr<Task>> Handle(BanUserCommand request, CancellationToken cancellationToken)
     {
-        if (await _userRepository.GetByIdAsync(request.Id) is User user)
+        if (await _userRepository.GetByIdAsync(request.Id) is not User user)
         {
-            user.Ban();
-
-            await _userRepository.SaveChangesAsync();
-
-            return Task.CompletedTask;
+            return Domain.Common.Errors.Application.NotFound(request.Id, nameof(User));
         }
 
-        return Domain.Common.Errors.Application.NotFound(request.Id, nameof(User));
+        user.Ban();
+
+        await _userRepository.SaveChangesAsync();
+
+        return Task.CompletedTask;
     }
 }
 

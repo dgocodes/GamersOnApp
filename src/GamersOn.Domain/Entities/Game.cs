@@ -8,7 +8,7 @@ public class Game : Entity
 
     public virtual IList<GameEvaluation> Evaluations { get; set; } = new List<GameEvaluation>();
 
-    public void SetDisable()
+    public void Deactivate()
     {
         Active = false;
     }

@@ -1,9 +1,11 @@
-﻿using GamersOn.Domain.Entities;
+﻿using ErrorOr;
+using GamersOn.Application.OutputModels;
+using GamersOn.Domain.Entities;
 using GamersOn.Domain.Repositories;
 using MediatR;
 
 namespace GamersOn.Application.Queries.GameQueries;
-public record struct GetAllGameQueryHandler : IRequestHandler<GetAllGameQuery, IEnumerable<Game>>
+public record struct GetAllGameQueryHandler : IRequestHandler<GetAllGameQuery, ErrorOr<IList<GameResponse>>>
 {
     private readonly IGameRepository _gameRepository;
 
@@ -12,8 +14,13 @@ public record struct GetAllGameQueryHandler : IRequestHandler<GetAllGameQuery, I
         _gameRepository = gameRepository;
     }
 
-    public async Task<IEnumerable<Game>> Handle(GetAllGameQuery request, CancellationToken cancellationToken)
+    public async Task<ErrorOr<IList<GameResponse>>> Handle(GetAllGameQuery request, CancellationToken cancellationToken)
     {
-        return await _gameRepository.GetAllAsync();
+        if (await _gameRepository.GetAllAsync() is not IList<Game> games)
+        {
+            return Domain.Common.Errors.Application.NotFound(nameof(Game));
+        }
+
+        return GameResponse.FromGame(games).ToList();
     }
 }

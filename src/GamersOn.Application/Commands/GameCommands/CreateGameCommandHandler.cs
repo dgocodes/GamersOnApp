@@ -1,9 +1,11 @@
-﻿using GamersOn.Domain.Entities;
+﻿using ErrorOr;
+using GamersOn.Application.OutputModels;
+using GamersOn.Domain.Entities;
 using GamersOn.Domain.Repositories;
 using MediatR;
 
 namespace GamersOn.Application.Commands.GameCommands;
-public class CreateGameCommandHandler : IRequestHandler<CreateGameCommand, Guid>
+public class CreateGameCommandHandler : IRequestHandler<CreateGameCommand, ErrorOr<GameResponse>>
 {
     private readonly IGameRepository _gameRepository;
 
@@ -12,7 +14,7 @@ public class CreateGameCommandHandler : IRequestHandler<CreateGameCommand, Guid>
         _gameRepository = gameRepository;
     }
 
-    public async Task<Guid> Handle(CreateGameCommand request, CancellationToken cancellationToken)
+    public async Task<ErrorOr<GameResponse>> Handle(CreateGameCommand request, CancellationToken cancellationToken)
     {
         var newGame = new Game
         {
@@ -22,6 +24,6 @@ public class CreateGameCommandHandler : IRequestHandler<CreateGameCommand, Guid>
 
         await _gameRepository.CreateAsync(newGame);
 
-        return newGame.Id;
+        return GameResponse.FromGame(newGame);
     }
 }

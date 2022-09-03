@@ -15,16 +15,16 @@ public record struct UnbanUserCommandHandler : IRequestHandler<UnbanUserCommand,
 
     public async Task<ErrorOr<Task>> Handle(UnbanUserCommand request, CancellationToken cancellationToken)
     {
-        if (await _userRepository.GetByIdAsync(request.Id) is User user)
+        if (await _userRepository.GetByIdAsync(request.Id) is not User user)
         {
-            user.Unban();
-
-            await _userRepository.SaveChangesAsync();
-
-            return Task.CompletedTask;
+            return Domain.Common.Errors.Application.NotFound(request.Id, nameof(User));
         }
 
-        return Domain.Common.Errors.Application.NotFound(request.Id, nameof(User));
+        user.Unban();
+
+        await _userRepository.SaveChangesAsync();
+
+        return Task.CompletedTask;
     }
 }
 
